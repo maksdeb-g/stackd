@@ -95,10 +95,9 @@ stackd/
 
 ```bash
 cd backend
-cp .env.example .env
 # Edit .env with your API keys
 
-python3 -m venv venv
+python3/python -m venv venv     # Only use python 3.12
 source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload
@@ -110,7 +109,6 @@ uvicorn app.main:app --reload
 
 ```bash
 cd frontend
-cp .env.local.example .env.local
 # Edit .env.local: NEXT_PUBLIC_API_URL=http://localhost:8000
 
 npm install
