@@ -12,7 +12,11 @@ async def search_wikipedia(query: str, max_results: int = 4) -> list[Resource]:
         "srprop": "snippet|titlesnippet",
     }
 
-    async with httpx.AsyncClient(timeout=15) as client:
+    headers = {
+        "User-Agent": "StackdStudyBuddy/1.0 (educational project)"
+    }
+
+    async with httpx.AsyncClient(timeout=15, headers=headers) as client:
         try:
             resp = await client.get(settings.WIKI_BASE_URL, params=search_params)
             resp.raise_for_status()
