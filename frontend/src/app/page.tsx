@@ -1,17 +1,26 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Sparkles, Clock, ChevronRight, Layers } from "lucide-react";
-import { getSubtopics, getSearchHistory } from "@/lib/api";
+import { getSubtopics, getSearchHistory, getSuggestions } from "@/lib/api";
 import type { SearchHistoryItem } from "@/types";
 
 export default function HomePage() {
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [history, setHistory] = useState<SearchHistoryItem[]>([]);
+
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedIdx, setSelectedIdx] = useState(-1);
+
   const [subtopics, setSubtopics] = useState<string[]>([]);
   const [loadingSubtopics, setLoadingSubtopics] = useState(false);
-  const [history, setHistory] = useState<SearchHistoryItem[]>([]);
   const [subtopicError, setSubtopicError] = useState("");
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   const loadHistory = useCallback(async () => {
     try {
@@ -22,10 +31,63 @@ export default function HomePage() {
 
   useEffect(() => { loadHistory(); }, [loadHistory]);
 
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (query.trim().length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await getSuggestions(query);
+        setSuggestions(res);
+        setShowSuggestions(res.length > 0);
+        setSelectedIdx(-1);
+      } catch {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 250);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [query]);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
   function handleSearch(q?: string) {
     const term = (q ?? query).trim();
     if (!term) return;
+    setShowSuggestions(false);
     router.push(`/results?q=${encodeURIComponent(term)}`);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (showSuggestions && selectedIdx >= 0 && selectedIdx < suggestions.length) {
+        handleSearch(suggestions[selectedIdx]);
+      } else {
+        handleSearch();
+      }
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIdx((i) => Math.min(i + 1, suggestions.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIdx((i) => Math.max(i - 1, -1));
+    } else if (e.key === "Escape") {
+      setShowSuggestions(false);
+      setSelectedIdx(-1);
+      inputRef.current?.blur();
+    }
   }
 
   async function handleSubtopics() {
@@ -61,14 +123,15 @@ export default function HomePage() {
       </div>
 
       {/* Search box */}
-      <div className="w-full max-w-2xl fade-up delay-1">
+      <div ref={containerRef} className="w-full max-w-2xl fade-up delay-1 relative">
         <div className="relative flex items-center rounded-2xl border border-ink-muted bg-ink-soft shadow-xl">
           <Search className="absolute left-4 h-5 w-5 text-cream/30" />
           <input
+            ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            onKeyDown={handleKeyDown}
             placeholder="What do you want to learn today?"
             className="flex-1 bg-transparent py-4 pl-12 pr-4 text-base text-cream placeholder-cream/30 outline-none font-body"
           />
@@ -81,6 +144,27 @@ export default function HomePage() {
             Search
           </button>
         </div>
+
+        {/* Suggestions dropdown */}
+        {showSuggestions && suggestions.length > 0 && (
+          <div className="absolute z-50 mt-2 w-full rounded-xl border border-ink-muted bg-ink shadow-2xl overflow-hidden">
+            {suggestions.map((s, i) => (
+              <button
+                key={s}
+                onMouseDown={() => handleSearch(s)}
+                onMouseEnter={() => setSelectedIdx(i)}
+                className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors ${
+                  i === selectedIdx
+                    ? "bg-accent-yellow/20 text-accent-yellow"
+                    : "text-cream hover:bg-ink-muted"
+                }`}
+              >
+                <Search className="h-3.5 w-3.5 flex-shrink-0 text-cream/50" />
+                <span className="truncate">{s}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Subtopic button */}
         <div className="mt-3 flex justify-center">

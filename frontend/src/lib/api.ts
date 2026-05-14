@@ -59,5 +59,9 @@ export const deleteResource = (resourceId: string) =>
 
 export const getAllProgress = () => apiFetch<Resource[]>("/resources/progress/all");
 
+// ─── Suggestions ──────────────────────────────────────────────────────────────
+export const getSuggestions = (query: string) =>
+  apiFetch<string[]>(`/suggestions?query=${encodeURIComponent(query)}`);
+
 // ─── History ─────────────────────────────────────────────────────────────────
 export const getSearchHistory = () => apiFetch<SearchHistoryItem[]>("/history");
