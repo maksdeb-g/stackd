@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, FolderOpen, BarChart3, Layers } from "lucide-react";
+import { Search, FolderOpen, BarChart3, Layers, LogIn, User, LogOut } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 import clsx from "clsx";
 
 const links = [
@@ -12,6 +13,8 @@ const links = [
 
 export default function Nav() {
   const path = usePathname();
+  const { user, signOut, loading } = useAuth();
+
   return (
     <nav className="sticky top-0 z-50 border-b border-ink-muted bg-ink/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
@@ -25,8 +28,9 @@ export default function Nav() {
           </span>
         </Link>
 
-        {/* Links */}
+        {/* Right side */}
         <div className="flex items-center gap-1">
+          {/* Nav links */}
           {links.map(({ href, label, icon: Icon }) => {
             const active = path === href || (href !== "/" && path.startsWith(href));
             return (
@@ -45,6 +49,40 @@ export default function Nav() {
               </Link>
             );
           })}
+
+          {/* Auth */}
+          {!loading && (
+            <div className="ml-2 flex items-center gap-2">
+              {user ? (
+                <>
+                  <Link
+                    href="/auth/login"
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-cream/60 hover:text-cream transition-colors"
+                  >
+                    <User className="h-4 w-4" />
+                    <span className="hidden sm:inline truncate max-w-24">
+                      {user.email?.split("@")[0]}
+                    </span>
+                  </Link>
+                  <button
+                    onClick={signOut}
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-cream/40 hover:text-accent-coral transition-colors"
+                    title="Sign out"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  className="flex items-center gap-2 rounded-lg bg-accent-yellow px-4 py-2 text-sm font-semibold text-ink hover:bg-accent-yellow/90 transition-all"
+                >
+                  <LogIn className="h-4 w-4" />
+                  <span className="hidden sm:inline">Sign In</span>
+                </Link>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </nav>

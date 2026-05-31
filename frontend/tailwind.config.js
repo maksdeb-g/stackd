@@ -19,7 +19,7 @@ module.exports = {
           soft: "#ede8df",
         },
         accent: {
-          yellow: "#f5d547",
+          yellow: "#9D00FF",
           teal: "#2dd4bf",
           coral: "#ff6b6b",
           violet: "#8b5cf6",

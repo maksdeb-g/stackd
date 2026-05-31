@@ -9,7 +9,9 @@ services:
         sync: false
       - key: GOOGLE_BOOKS_API_KEY
         sync: false
-      - key: OPENAI_API_KEY
+      - key: OPENCLAW_API_KEY
+        sync: false
+      - key: OPENCLAW_BASE_URL
         sync: false
       - key: SUPABASE_URL
         sync: false
