@@ -1,10 +1,24 @@
 import type { Resource, Folder, SearchHistoryItem } from "@/types";
+import { supabase } from "@/lib/supabase";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+async function getAccessToken(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token ?? null;
+}
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = await getAccessToken();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers,
     ...init,
   });
   if (!res.ok) {
@@ -25,6 +39,9 @@ export const getSubtopics = (topic: string) =>
     method: "POST",
     body: JSON.stringify({ topic }),
   });
+
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+export const getProfile = () => apiFetch<{ id: string; email: string }>("/auth/me");
 
 // ─── Folders ─────────────────────────────────────────────────────────────────
 export const getFolders = () => apiFetch<Folder[]>("/folders");

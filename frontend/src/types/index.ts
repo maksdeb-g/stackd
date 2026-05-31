@@ -2,6 +2,13 @@ export type Difficulty = "beginner" | "intermediate" | "advanced";
 export type Source = "youtube" | "book" | "wikipedia";
 export type ProgressStatus = "WANT_TO_LEARN" | "IN_PROGRESS" | "DONE";
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  aud?: string;
+  role?: string;
+}
+
 export interface Resource {
   id?: string;
   title: string;
