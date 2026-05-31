@@ -1,10 +1,5 @@
 {
   "framework": "nextjs",
   "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "env": {
-    "NEXT_PUBLIC_API_URL": "https://your-stackd-api.onrender.com",
-    "NEXT_PUBLIC_SUPABASE_URL": "https://zkasxtfwbdtavnhsuttf.supabase.co",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InprYXN4dGZ3YmR0YXZuaHN1dHRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3NTAyNDcsImV4cCI6MjA5MzMyNjI0N30.1QWj4uaRzkr1xD61T_2C-SoX7YqUMSPUXorrYPQGBro"
-  }
+  "outputDirectory": ".next"
 }
