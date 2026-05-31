@@ -29,6 +29,7 @@ export default function FoldersPage() {
   const [selected, setSelected] = useState<Folder | null>(null);
   const [resources, setResources] = useState<Resource[]>([]);
   const [loadingResources, setLoadingResources] = useState(false);
+  const [error, setError] = useState("");
 
   const loadFolders = useCallback(async () => {
     try {
@@ -53,12 +54,16 @@ export default function FoldersPage() {
   async function handleCreate() {
     if (!newName.trim()) return;
     setCreating(true);
+    setError("");
     try {
       await createFolder(newName.trim(), newColor);
       setNewName("");
       setShowCreate(false);
       loadFolders();
-    } catch { /* */ }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Something went wrong";
+      setError(msg);
+    }
     setCreating(false);
   }
 
@@ -143,6 +148,9 @@ export default function FoldersPage() {
               </button>
             </div>
           </div>
+          {error && (
+            <p className="mt-3 text-sm text-accent-coral">{error}</p>
+          )}
         </div>
       )}
 

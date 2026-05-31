@@ -5,7 +5,7 @@ from app.services.books_service import search_books
 from app.services.wikipedia_service import search_wikipedia
 from app.models.schemas import Resource
 from app.core.database import get_supabase
-from app.core.auth import get_optional_user
+from app.core.auth import get_optional_user, get_optional_token
 from datetime import datetime, timezone
 
 router = APIRouter(prefix="/search", tags=["search"])
@@ -14,6 +14,7 @@ router = APIRouter(prefix="/search", tags=["search"])
 async def unified_search(
     query: str = Query(..., min_length=1),
     user: dict | None = Depends(get_optional_user),
+    token: str | None = Depends(get_optional_token),
 ):
     """Aggregate results from YouTube, Google Books, and Wikipedia."""
     if not query.strip():
@@ -33,7 +34,7 @@ async def unified_search(
 
     if user:
         try:
-            db = get_supabase()
+            db = get_supabase(token)
             db.table("search_history").insert({
                 "user_id": user["id"],
                 "query": query,

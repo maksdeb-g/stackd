@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS folders (
   color      TEXT DEFAULT '#6366f1',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+-- Folder names must be unique per user
+ALTER TABLE folders ADD CONSTRAINT folders_name_unique_per_user UNIQUE (user_id, name);
 CREATE INDEX IF NOT EXISTS idx_folders_user ON folders(user_id);
 
 -- ─── Saved Resources ──────────────────────────────────────────────────────────

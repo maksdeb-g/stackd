@@ -5,6 +5,11 @@ import httpx
 
 security = HTTPBearer(auto_error=False)
 
+async def get_access_token(credentials: HTTPAuthorizationCredentials | None = Depends(security)) -> str:
+    if credentials is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+    return credentials.credentials
+
 async def get_current_user(credentials: HTTPAuthorizationCredentials | None = Depends(security)) -> dict:
     if credentials is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
@@ -21,6 +26,11 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials | None = De
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
         return resp.json()
 
+
+async def get_optional_token(credentials: HTTPAuthorizationCredentials | None = Depends(security)) -> str | None:
+    if credentials is None:
+        return None
+    return credentials.credentials
 
 async def get_optional_user(credentials: HTTPAuthorizationCredentials | None = Depends(security)) -> dict | None:
     if credentials is None:

@@ -21,13 +21,14 @@ const DIFFICULTY_COLOR = {
 interface Props {
   resource: Resource;
   folders: Folder[];
+  isSaved?: boolean;
   onSaved?: () => void;
   style?: React.CSSProperties;
 }
 
-export default function ResourceCard({ resource, folders, onSaved, style }: Props) {
+export default function ResourceCard({ resource, folders, isSaved = false, onSaved, style }: Props) {
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(isSaved);
   const [showFolderPicker, setShowFolderPicker] = useState(false);
   const [error, setError] = useState("");
 

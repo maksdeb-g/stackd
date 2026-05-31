@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Search, SlidersHorizontal, Youtube, BookOpen, Globe, AlertCircle } from "lucide-react";
-import { searchResources, getFolders } from "@/lib/api";
+import { searchResources, getFolders, getAllProgress } from "@/lib/api";
 import type { Resource, Folder, Source, Difficulty } from "@/types";
 import ResourceCard from "@/components/ResourceCard";
 import clsx from "clsx";
@@ -27,6 +27,7 @@ function ResultsContent() {
 
   const [resources, setResources] = useState<Resource[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
+  const [savedLinks, setSavedLinks] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sourceFilter, setSourceFilter] = useState<Source | "all">("all");
@@ -37,9 +38,14 @@ function ResultsContent() {
     setLoading(true);
     setError("");
     try {
-      const [results, fols] = await Promise.all([searchResources(query), getFolders()]);
+      const [results, fols, saved] = await Promise.all([
+        searchResources(query),
+        getFolders(),
+        getAllProgress(),
+      ]);
       setResources(results);
       setFolders(fols);
+      setSavedLinks(new Set(saved.map((r) => r.link)));
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Search failed");
     } finally {
@@ -153,6 +159,7 @@ function ResultsContent() {
               key={`${r.link}-${i}`}
               resource={r}
               folders={folders}
+              isSaved={savedLinks.has(r.link)}
               style={{ animationDelay: `${i * 0.04}s` }}
             />
           ))}

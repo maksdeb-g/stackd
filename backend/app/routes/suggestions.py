@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query, Depends
 from app.core.database import get_supabase
-from app.core.auth import get_current_user
+from app.core.auth import get_current_user, get_access_token
 
 router = APIRouter(prefix="/suggestions", tags=["suggestions"])
 
@@ -8,10 +8,11 @@ router = APIRouter(prefix="/suggestions", tags=["suggestions"])
 async def get_suggestions(
     query: str = Query(..., min_length=1),
     user: dict = Depends(get_current_user),
+    token: str = Depends(get_access_token),
 ):
     """Return past search queries that match the typed text (case-insensitive)."""
     try:
-        db = get_supabase()
+        db = get_supabase(token)
         res = (
             db.table("search_history")
             .select("query")
