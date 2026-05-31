@@ -2,9 +2,8 @@ services:
   - type: web
     name: stackd-api
     env: python
-    pythonVersion: 3.12.0
     rootDir: backend
-    buildCommand: pip install --only-binary :all: -r requirements.txt
+    buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: YOUTUBE_API_KEY
